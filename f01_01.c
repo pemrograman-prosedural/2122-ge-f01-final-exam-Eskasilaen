@@ -4,18 +4,19 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stddef.h>
 #include "./libs/dorm.h"
 #include "./libs/student.h"
 
 int main(int _argc, char **_argv)
 {
-    dorm* LEFT = (drm*) malloc(sizeof(Dorm));
+    dorm* LEFT = (Dorm*) malloc(sizeof(Dorm));
     strcpy(LEFT->name,"left");
     LEFT->capacity = 10;
     LEFT->gender = GENDER_FEMALE;
     LEFT->residents_num = 0;
-    dorm *dorms = (drm*) malloc(1 * sizeof(Dorm));
-    student *students = (mhs*) malloc(1 * sizeof(Student));
+    dorm *dorms = (Dorm*) malloc(1 * sizeof(Dorm));
+    student *students = (Student*) malloc(1 * sizeof(Student));
     unsigned short zdrm;
     unsigned short zstd;
     char line[255];
@@ -76,7 +77,7 @@ int main(int _argc, char **_argv)
                 token = strtok(NULL, delimiter); char *_year = token;
                 token = strtok(NULL, delimiter);
                 if ( zstd > 0 ) {
-                    students = (mhs*) realloc(students, (zstd + 1) * sizeof(mhs));
+                    students = (Student*) realloc(students, (zstd + 1) * sizeof(Student));
                 }
                 if ( strcmp(token, "male") == 0 ) {
                     students[zstd] = create_student(_id, _name, _year, GENDER_MALE);
@@ -93,7 +94,7 @@ int main(int _argc, char **_argv)
                 token = strtok(NULL, delimiter); unsigned short _capacity = atoi(token);
                 token = strtok(NULL, delimiter);
                 if ( zdrm > 0 ) {
-                    dorms = (drm*) realloc(dorms, (zdrm+1) * sizeof(drm));
+                    dorms = (Dorm*) realloc(dorms, (zdrm+1) * sizeof(Dorm));
                 }
                 if ( strcmp(token, "male") == 0 ) {
                     dorms[zdrm] = create_dorm(_name, _capacity, GENDER_MALE);
@@ -110,10 +111,10 @@ int main(int _argc, char **_argv)
                 token = strtok(NULL, delimiter); char *dorm_name = token;
 
                 short student_id = find_id(_id, students, zstd);
-                short dormIdx = findDormIdx(dorm_name, dorms, zdrm);
+                short dorm_id = find_id(dorm_name, dorms, zdrm);
 
-                if ( studentIdx>=0 && dormIdx>=0 ) {
-                    assign(&students[student_id], &dorms[dormIdx]);
+                if ( student_id>=0 && dorm_id>=0 ) {
+                    assign(&students[student_id], &dorms[dorm_id]);
                 }
             }
 
@@ -154,7 +155,7 @@ int main(int _argc, char **_argv)
                 short student_id = find_id(token, students, zstd);
                 short dorm_id = find_dorm(students->dorm->name, dorms, zdrm);
                 unassign(&students[student_id], &dorms[dorm_id]);
-                students[studentIdx].dorm = LEFT;
+                students[student_id].dorm = LEFT;
             }
         }
     }
