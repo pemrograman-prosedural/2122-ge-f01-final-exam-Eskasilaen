@@ -28,7 +28,7 @@ int main(int _argc, char **_argv)
         line[strcspn(line, "\n")] = 0;
 
         if (strcmp(line, "---") == 0) {
-            printf("---\n"); // Print triple dash before breaking the loop
+            printf("---\n");
             break;
         }
 
