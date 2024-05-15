@@ -15,8 +15,8 @@ int main(int _argc, char **_argv)
     LEFT->gender = GENDER_FEMALE;
     LEFT->residents_num = 0;
     
-    Dorm *dorms = (Dorm*) malloc(1 * sizeof(Dorm));
-    struct student_t *students = (struct student_t*) malloc(1 * sizeof(struct student_t));
+    Dorm *dorms = NULL;
+    struct student_t *students = NULL;
     
     unsigned short totalDorm = 0;
     unsigned short totalStudent = 0;
@@ -59,15 +59,16 @@ int main(int _argc, char **_argv)
 
                 if (totalStudent > 0) {
                     students = (struct student_t*) realloc(students, (totalStudent + 1) * sizeof(struct student_t));
+                } else {
+                    students = (struct student_t*) malloc(sizeof(struct student_t));
                 }
 
                 if (strcmp(token, "male") == 0) {
                     students[totalStudent] = create_student(_id, _name, _year, GENDER_MALE);
-                    totalStudent++;
                 } else if (strcmp(token, "female") == 0) {
                     students[totalStudent] = create_student(_id, _name, _year, GENDER_FEMALE);
-                    totalStudent++;
                 }
+                totalStudent++;
             } else if (strcmp(token, "dorm-add") == 0) {
                 token = strtok(NULL, delim); char *_name = token;
                 token = strtok(NULL, delim); unsigned short _capacity = atoi(token);
@@ -75,15 +76,16 @@ int main(int _argc, char **_argv)
 
                 if (totalDorm > 0) {
                     dorms = (Dorm*) realloc(dorms, (totalDorm + 1) * sizeof(Dorm));
+                } else {
+                    dorms = (Dorm*) malloc(sizeof(Dorm));
                 }
 
                 if (strcmp(token, "male") == 0) {
                     dorms[totalDorm] = create_dorm(_name, _capacity, GENDER_MALE);
-                    totalDorm++;
                 } else if (strcmp(token, "female") == 0) {
                     dorms[totalDorm] = create_dorm(_name, _capacity, GENDER_FEMALE);
-                    totalDorm++;
                 }
+                totalDorm++;
             } else if (strcmp(token, "assign-student") == 0) {
                 token = strtok(NULL, delim); char *_id = token;
                 token = strtok(NULL, delim); char *dorm_name = token;
@@ -100,25 +102,25 @@ int main(int _argc, char **_argv)
 
                 short studentIdx = findStudentIdx(_id, students, totalStudent);
                 short newDormIdx = findDormIdx(dorm_name, dorms, totalDorm);
-                char *_name = students[studentIdx].dorm->name;
 
-                if (_name != NULL) {
-                    short oldDormIdx = findDormIdx(_name, dorms, totalDorm);
-
-                    if (studentIdx >= 0 && newDormIdx >= 0 && oldDormIdx >= 0) {
-                        moveStudent(&students[studentIdx], &dorms[newDormIdx], &dorms[oldDormIdx]);
+                if (studentIdx >= 0 && newDormIdx >= 0) {
+                    if (students[studentIdx].dorm != NULL) {
+                        short oldDormIdx = findDormIdx(students[studentIdx].dorm->name, dorms, totalDorm);
+                        if (oldDormIdx >= 0) {
+                            moveStudent(&students[studentIdx], &dorms[newDormIdx], &dorms[oldDormIdx]);
+                        }
+                    } else {
+                        assign(&students[studentIdx], &dorms[newDormIdx]);
                     }
-                } else {
-                    assign(&students[studentIdx], &dorms[newDormIdx]);
                 }
             } else if (strcmp(token, "dorm-empty") == 0) {
                 token = strtok(NULL, delim);
                 char *dorm_name = token;
                 short target = findDormIdx(dorm_name, dorms, totalDorm);
 
-                for (short i = 0; i < totalStudent; i++) {
-                    if (students[i].dorm != NULL) {
-                        if (strcmp(students[i].dorm->name, dorm_name) == 0) {
+                if (target >= 0) {
+                    for (short i = 0; i < totalStudent; i++) {
+                        if (students[i].dorm != NULL && strcmp(students[i].dorm->name, dorm_name) == 0) {
                             unassign(&students[i], &dorms[target]);
                         }
                     }
@@ -126,9 +128,14 @@ int main(int _argc, char **_argv)
             } else if (strcmp(token, "student-leave") == 0) {
                 token = strtok(NULL, delim);
                 short studentIdx = findStudentIdx(token, students, totalStudent);
-                short dormIdx = findDormIdx(students[studentIdx].dorm->name, dorms, totalDorm);
-                unassign(&students[studentIdx], &dorms[dormIdx]);
-                students[studentIdx].dorm = LEFT;
+
+                if (studentIdx >= 0 && students[studentIdx].dorm != NULL) {
+                    short dormIdx = findDormIdx(students[studentIdx].dorm->name, dorms, totalDorm);
+                    if (dormIdx >= 0) {
+                        unassign(&students[studentIdx], &dorms[dormIdx]);
+                        students[studentIdx].dorm = LEFT;
+                    }
+                }
             }
         }
     }
