@@ -23,24 +23,8 @@ int main(int _argc, char **_argv)
 
 
     while ( 1 ) {
-        line[0] = '\0';
-        fgets(line, 255, stdin);
-        fflush(stdin);
-        
-        {
-            int len = strlen(line);
-            for (short a = 0; a < len; a++) {
-                if(line[a] == '\r' || line[a] == '\n') {
-                    for(short b = a; b < len; b++) { line[b] = line[b + 1]; }
-                    len--;
-                    a--;
-                }
-            }
-        }
-
-        if ( strcmp(line, "---") == 0 ) break;
-
-        else if ( strcmp(line, "student-print-all") == 0 ) {
+    
+        if ( strcmp(line, "student-print-all") == 0 ) {
             for (short i=0; i<totalStudent; i++) {
                 printStudent(students[i]);
             }
@@ -110,7 +94,6 @@ int main(int _argc, char **_argv)
 
                 short studentIdx = findStudentIdx(_id, students, totalStudent);
                 short dormIdx = findDormIdx(dorm_name, dorms, totalDorm);
-
                 if ( studentIdx>=0 && dormIdx>=0 ) {
                     assign(&students[studentIdx], &dorms[dormIdx]);
                 }
@@ -152,9 +135,12 @@ int main(int _argc, char **_argv)
             else if ( strcmp(token, "student-leave") == 0 ) {
                 token = strtok(NULL, delim);
                 short studentIdx = findStudentIdx(token, students, totalStudent);
-                short dormIdx = findDormIdx(students->dorm->name, dorms, totalDorm);
+                short dormIdx = findDormIdx(students[studentIdx].dorm->name, dorms, totalDorm);
                 unassign(&students[studentIdx], &dorms[dormIdx]);
                 students[studentIdx].dorm = LEFT;
+            }
+            else if (strcmp(line, "---" ) == 0 ) {
+                break;
             }
         }
     }
